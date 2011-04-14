@@ -96,7 +96,7 @@
                         id: 'page2',
                         xtype: 'panel',
                         cardHistoryTitle: 'Title #2',
-                        html: '<div class="demo2">Page #3</div>',
+                        html: '<div class="demo2">Page #2</div>',
                         styleHtmlContent: true
                     },
                     {
