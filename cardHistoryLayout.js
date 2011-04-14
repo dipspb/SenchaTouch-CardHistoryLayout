@@ -1,10 +1,11 @@
 /**
  * @class Ext.ux.layout.CardHistoryLayout
  * @extends Ext.layout.CardLayout
- * 
-This layout extends Ext.layout.CardLayout introducing item transitions history with appropriate methods. Also,
- * it provides ability to setup default transition animation via defaultAnimation config option. It remembers
- * each animation used to step forth and provides correct reverse animation for each step back.
+ *
+ * This layout extends Ext.layout.CardLayout introducing item transitions history with appropriate methods.
+ * It can handle state of toolbar the back control. Also, it provides ability to setup default transition
+ * animation via defaultAnimation config option. It remembers each animation used to step forth and provides
+ * correct reverse animation for each step back.
  *
  * usage:
  *
@@ -13,18 +14,51 @@ This layout extends Ext.layout.CardLayout introducing item transitions history w
  *              layout: {
  *                  xtype: 'layout',
  *                  type:'cardhistory',
- *                  defaultAnimation: 'slide'
+ *                  defaultAnimation: 'slide',
+ *
+ *                  // To obtain current card title
+ *                  getTitle: function() {
+ *                      return Ext.getCmp('someToolbar').titleEl.getHTML();
+ *                  },
+ *
+ *                  // To apply title value
+ *                  setTitle: function(text) {
+ *                      var tb = Ext.getCmp('someToolbar');
+ *                      tb.setTitle(text);
+ *                      tb.doComponentLayout();
+ *                  },
+ *
+ *                  // To set Back control state
+ *                  setBack: function(visible, text) {
+ *                      var backBtn = Ext.getCmp('someBackButton');
+ *                      backBtn.setText(text);
+ *                      backBtn.setVisible(visible);
+ *                      backBtn.doComponentLayout();
+ *                  }
  *               },
  *               items: [
- *               ...
+ *                   {
+ *                       xtype: 'panel',
+ *                       // To define card title in a static way
+ *                       cardHistoryTitle: 'First list'
+ *                   },
+ *                   {
+ *                       xtype: 'panel',
+ *                       cardHistoryTitle: 'Second list'
+ *                   }
  *               ]
  *             });
  *
  *
- *  panel.getLayout().forth('someItemId_orInstance', someOptionalAnimation_asName_orInstance);
+ *  // Using of optionalItemTitle parameter here is one more way to setup card title dynamically
+ *  panel.getLayout().forth('someItemId_orInstance', someOptionalAnimation_asName_orInstance, 'optionalItemTitle');
  *  panel.getLayout().back();
  *
-
+ *  There are two ways to define next card title while transiting forth
+ *  (in order of precedence, from high to low):
+ *
+ *    1. Using nextTitle parameter of the forth method
+ *    2. Using cardHistoryTitle custom config option for the card
  *
  */
 
@@ -51,11 +85,10 @@ Ext.ux.layout.CardHistoryLayout = Ext.extend(Ext.layout.CardLayout, {
 
             ba.config = Ext.apply({}, {reverse: true}, a.config);
             return ba;
-
         };
     },
 
-/**
+    /**
      * Return true if item history is empty.
      * @returns {boolean}
      */
@@ -63,28 +96,59 @@ Ext.ux.layout.CardHistoryLayout = Ext.extend(Ext.layout.CardLayout, {
         return (0 == this.history.length);
     },
 
-/**
+    /**
      * Set new active item. Current active item is pushed to the history.
-     * @param {Mixed} item The item to set as active.
+     * @param {Mixed} nextItem The item to set as active.
      * @param {Mixed} animation Animation to use in transition.
+     * @param {string} nextTitle Text to set as title after transition.
      */
-    forth: function(item, animation) {
+    forth: function(nextItem, animation, nextTitle) {
         var anim = animation || this.defaultAnimation;
         if ('string' == typeof anim) {
             anim = Ext.anims[anim];
         }
-        this.history.push({item: this.getActiveItem(), animation: anim});
-        this.setActiveItem(item, anim);
+        nextTitle = nextTitle || Ext.getCmp(nextItem)['cardHistoryTitle'] || null;
+        var thisItem = this.getActiveItem();
+        var thisTitle = this.getTitle() || thisItem['cardHistoryTitle'] || null;
+
+        this.history.push({item: thisItem, title: thisTitle, animation: anim});
+
+        this.setActiveItem(nextItem, anim);
+        if (nextTitle) this.setTitle(nextTitle);
+        this.setBack(true /*in case of forth transition it is always true*/, thisTitle);
     },
 
-/**
+    /**
      * Set active previous item from the history.
      */
     back: function() {
         if (this.isHistoryEmpty()) return;
         var prevState = this.history.pop();
+        var prevPrevState = this.isHistoryEmpty() ? null : this.history[this.history.length-1];
+
         this.setActiveItem(prevState.item, this.reverse(prevState.animation));
-    }
+        if (prevState.title) this.setTitle(prevState.title);
+        this.setBack(!this.isHistoryEmpty(), prevPrevState ? prevPrevState.title : null);
+    },
+
+    /**
+     * Handler function to set back control visibility and text on each step forth.
+     * @param {boolean} visible Is true to set back control visible, flase for hidden.
+     * @param {string} text Text to show in the back control.
+     */
+    setBack: Ext.emptyFn,
+
+    /**
+     * Handler function to get current title value.
+     */
+    getTitle: Ext.emptyFn,
+
+    /**
+     * Handler function to set back control visibility and text on each step forth.
+     * @param {string} text Text to use as title.
+     */
+    setTitle: Ext.emptyFn
+
 });
 
 Ext.regLayout('cardhistory', Ext.ux.layout.CardHistoryLayout);
