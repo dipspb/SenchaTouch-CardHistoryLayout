@@ -3,9 +3,8 @@
  * @extends Ext.layout.CardLayout
  *
  * This layout extends Ext.layout.CardLayout introducing item transitions history with appropriate methods.
- * It can handle state of toolbar the back control. Also, it provides ability to setup default transition
- * animation via defaultAnimation config option. It remembers each animation used to step forth and provides
- * correct reverse animation for each step back.
+ * It can handle the title and back control. The defaultAnimation config option can be used to set default animation
+ * type. It remembers each animation used to step forth and provides correct reverse animation for each step back.
  *
  * usage:
  *

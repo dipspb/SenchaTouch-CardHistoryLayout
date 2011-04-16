@@ -1,18 +1,18 @@
 SenchaTouch-CardHistoryLayout
 ===
 
-This layout extends Ext.layout.CardLayout introducing item transitions history with appropriate methods. It can handle state of toolbar the back control.
+This layout extends Ext.layout.CardLayout introducing item transitions history with appropriate methods. It can handle the title and back control.
 
 See index.html and index.js for full usage example.
 
 ## Features
 
-* Doesn't require you to use any exact type of toolbar or back control. Any will do.
-* Doesn't assume or require any exact order of switching cards forth. Any order supported. You can switch, say, A->B->E->D->C->B->A. It will step pages history back as A->B->C->D->E->B->A.
-* Provides ability to setup default transition animation via *defaultAnimation* config option.
-* Store in history the animation used in each step forth, to provide correct reverse animation for each step back.
-* Optionally can store current cart title in history and restore it while transiting back.
-* Optionally can update visibility state and text for any type of "Back" control.
+* Support any type of title or back control.
+* Support any transition order. You can switch, say, A->B->E->D->C->B->A. It will step pages history back as A->B->C->D->E->B->A.
+* Animation used on each step forth is stored in history, to provide correct reverse animation on each step back.
+* The defaultAnimation config option can be used to set default animation type.
+* Can store current cart title in history and restore it while transiting back.
+* Can update visibility state and text for any type of "Back" control.
 
 ## Usage
 
